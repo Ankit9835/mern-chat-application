@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { RegisterUser } from "../../apicalls/users";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const [user, setUser] = useState({
@@ -7,6 +9,20 @@ const Register = () => {
     email: "",
     password: "",
   });
+
+  const register = async () => {
+    try {
+      const response = await RegisterUser(user)
+      if(response.success){
+        toast.success(response.message)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      alert(error.message)
+    }
+  }
+
   return (
     <div className="h-screen bg-primary flex items-center justify-center">
       <div className="bg-white shadow-md flex flex-col w-96 gap-5 p-5">
@@ -29,7 +45,7 @@ const Register = () => {
           onChange={(e) => setUser({ ...user, password: e.target.value })}
           placeholder="Enter your password"
         />
-        <button className="contained-btn">
+        <button className="contained-btn" onClick={register}>
             Register
         </button>
 
