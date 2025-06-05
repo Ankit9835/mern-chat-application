@@ -76,10 +76,25 @@ router.post("/login", async (req, res) => {
 
 router.get('/get-current-user', authMiddleware, async(req,res) => {
   try {
-    const user = User.findOne({_id: req.body.userId})
+    const user = await User.findOne({_id: req.user.id})
     res.send({
       success:true,
-      message:"User fetched successfully"
+      message:"User fetched successfully",
+      data:user
+    })
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+router.get('/get-all-users', authMiddleware, async (req,res) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user.id } });
+    console.log('ttttttttt',users)
+    res.send({
+      success:true,
+      message:"User fetched successfully",
+      data:users
     })
   } catch (error) {
     console.log(error)

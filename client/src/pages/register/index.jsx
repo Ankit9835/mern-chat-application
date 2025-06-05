@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { RegisterUser } from "../../apicalls/users";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { hideLoader, showLoader } from "../../redux/loaderSlice";
 
 const Register = () => {
+  const dispatch = useDispatch()
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -12,7 +15,9 @@ const Register = () => {
 
   const register = async () => {
     try {
+      dispatch(showLoader())
       const response = await RegisterUser(user)
+      dispatch(hideLoader())
       if(response.success){
         toast.success(response.message)
       } else {

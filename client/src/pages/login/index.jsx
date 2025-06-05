@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { LoginUser } from "../../apicalls/users";
+import { useDispatch } from "react-redux";
+import { hideLoader, showLoader } from "../../redux/loaderSlice";
 
 const Login = () => {
+  const dispatch = useDispatch()
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -11,7 +14,9 @@ const Login = () => {
 
   const login = async() => {
     try {
+      dispatch(showLoader())
       const response = await LoginUser(user)
+      dispatch(hideLoader())
       if(response.success){
         toast.success(response.message)
         localStorage.setItem('token', response.data)
