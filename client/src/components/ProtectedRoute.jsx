@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { SetAllUsers, SetUser } from '../redux/userSlice'
+import { SetAllChats, SetAllUsers, SetUser } from '../redux/userSlice'
+import { getAllChats } from '../apicalls/chats'
 
 const ProtectedRoute = ({children}) => {
   const {user,allUser} = useSelector(state => state.userReducer)
@@ -14,14 +15,12 @@ const ProtectedRoute = ({children}) => {
     try {
         const response = await currentUser()
         const allUsers = await getAllUsers()
-        console.log('restttttttttttt',allUsers.data)
+        const chats = await getAllChats()
+        console.log('chats',chats)
         if(response.success){
             dispatch(SetUser(response.data))
-            console.log('length', allUser.length)
-            if (allUser.length === 0) {
-    dispatch(SetAllUsers(allUsers.data));
-  }
-            
+            dispatch(SetAllUsers(allUsers.data));
+            dispatch(SetAllChats(chats.data))
         } else {
           console.log('test')
             navigate('/login')
