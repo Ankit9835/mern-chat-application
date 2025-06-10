@@ -45,8 +45,30 @@ const ChatUser = () => {
         }
     }
 
+    const clearUnreadMsg = async() => {
+        try {
+            dispatch(showLoader())
+            const response = await ClearChatMessages(selectedChats._id);
+            dispatch(hideLoader())
+             if (response.success) {
+        const updatedChats = allChats.map((chat) => {
+          if (chat._id === selectedChat._id) {
+            return response.data;
+          }
+          return chat;
+        });
+        dispatch(SetAllChats(updatedChats));
+      }
+        } catch (error) {
+            
+        }
+    }
+
     useEffect(() => {
         getAllMessages()
+      
+            clearUnreadMsg() 
+        
     },[selectedChats])
 
   return (
@@ -78,6 +100,7 @@ const ChatUser = () => {
                                     {moment(mess.createdAt).format("hh:mm A")}
                                 </h1>
                             </div>
+                            {isCurrentUser && <i className={`ri-check-double-line ${messages.read ? "text-green-700" : "text-gray-500"}` }></i>}
                         </div>
                     )
                 })}

@@ -74,6 +74,22 @@ const UsersList = ({searchKey}) => {
       );
     }
   };
+
+  const getUnReadMsg = (userObj) => {
+    const chat = allChats.find((chat) => chat.members.map((mem) => mem._id).includes(userObj._id))
+    if (
+      chat &&
+      chat?.unreadMessages &&
+      chat?.lastMessage?.sender !== user._id
+    ) {
+      return (
+        <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          {chat?.unreadMessages}
+        </div>
+      );
+    }
+  }
+  
   return (
     <div>
      {getChat()
@@ -92,14 +108,14 @@ const UsersList = ({searchKey}) => {
                         )
                     }
                     <div className="flex flex-col gap-1">
-                        <h1>
-                            {user?.name}
-                        </h1>
-                          
-                            {getLastMsg(user)}
-                     
-                            
+                        <div className="flex gap-1">
+                            <h1>
+                                {user?.name}
+                            </h1>
+                            {getUnReadMsg(user)}
+                        </div>
                         
+                        {getLastMsg(user)}
                     </div>
                     
                 </div>

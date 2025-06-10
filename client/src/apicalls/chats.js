@@ -21,3 +21,14 @@ export const createChats = async (members) => {
     throw error;
   }
 }
+
+export const ClearChatMessages = async (chatId) => {
+  try {
+    const response = await axiosInstance.post("chats/clear-unread-messages", {
+      chat: chatId,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
