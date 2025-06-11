@@ -35,11 +35,10 @@ router.post('/create-message', authMiddleware, async(req,res) => {
 
 router.get('/get-all-message/:chatId', authMiddleware, async (req,res) => {
     try {
-        console.log(req.params.chatId)
         const message = await Message.find({
             chat:req.params.chatId
         }).sort({createdAt: 1})
-        console.log('rrrrrr',message)
+       
         return res.send({
             message:"message fetched successfully",
             status:200,

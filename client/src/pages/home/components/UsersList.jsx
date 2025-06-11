@@ -8,7 +8,6 @@ import moment from "moment"
 const UsersList = ({searchKey}) => {
     const dispatch = useDispatch()
   const {allUser, allChats, user, selectedChats} = useSelector(state => state.userReducer)
-  console.log('ppppppppppp',allChats)
   const insertChats = async(receipentUserId) => {
     try {
       dispatch(showLoader());
@@ -43,8 +42,12 @@ const UsersList = ({searchKey}) => {
   }
 
   const getChat = () => {
-    return allUser.filter((obj) => obj.name.toLowerCase().includes(searchKey.toLowerCase())) ||
-        allChats.map((chat) => chat.members.map((mem) => mem._id)).includes(user._id)
+    if(searchKey){
+      return allChats
+    }
+    return allUser.filter((obj) => obj.name.toLowerCase().includes(searchKey.toLowerCase()))
+    // return allUser.filter((obj) => obj.name.toLowerCase().includes(searchKey.toLowerCase())) ||
+    //     allChats.map((chat) => chat.members.map((mem) => mem._id)).includes(user._id)
   }
 
   const getSelectedChats = (userId) => {
@@ -93,7 +96,11 @@ const UsersList = ({searchKey}) => {
   return (
     <div>
      {getChat()
-     .map((user) => {
+     .map((chatObjOrUserObj) => {
+      let user = chatObjOrUserObj
+      if(chatObjOrUserObj.members){
+        user = chatObjOrUserObj.members.find((mem) => mem._id !== user._id)
+      }
         return (
             <div key={user._id} className={`shadow border p-5 flex justify-between cursor-pointer ${getSelectedChats(user) && "border-primary border-2"}`} onClick={() => openChat(user._id)}>
                 <div className='flex gap-2'>

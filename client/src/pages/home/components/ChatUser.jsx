@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { getMessages, sendMessage } from '../../../apicalls/messages'
 import { hideLoader, showLoader } from '../../../redux/loaderSlice'
 import moment from "moment"
+import { ClearChatMessages } from '../../../apicalls/chats'
 
-const ChatUser = () => {
+const ChatUser = ({socket}) => {
     const [newMessage,setNewMessage] = useState('')
     const [messages, setMessages] = useState([])
     const dispatch = useDispatch()
@@ -19,12 +20,17 @@ const ChatUser = () => {
                 sender: user._id,
                 text: newMessage
             }
-            dispatch(showLoader())
+            socket.emit("send-messages", {
+                ...req,
+                members: selectedChats.members.map((mem) => mem._id),
+                createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
+                read: false
+            })
             const response = await sendMessage(req)
-            dispatch(hideLoader())
-            if(response.success){
+            
+           
                 setNewMessage('')
-            }
+            
         } catch (error) {
             console.log(error)
         }
@@ -50,6 +56,7 @@ const ChatUser = () => {
             dispatch(showLoader())
             const response = await ClearChatMessages(selectedChats._id);
             dispatch(hideLoader())
+            console.log('mmmmm',response)
              if (response.success) {
         const updatedChats = allChats.map((chat) => {
           if (chat._id === selectedChat._id) {
@@ -66,10 +73,22 @@ const ChatUser = () => {
 
     useEffect(() => {
         getAllMessages()
-      
+        if(selectedChats?.lastMessage?.sender != user._id){
             clearUnreadMsg() 
-        
+        }
+
+        socket.on('receive-messages', (message) => {
+            setMessages((prev) => [...prev, message])
+        })
     },[selectedChats])
+
+    useEffect(() => {
+    // always scroll to bottom for messages id
+    const messagesContainer = document.getElementById("messages");
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }, [messages]);
+
+    
 
   return (
     <div className='shadow bg-white border rounded-2xl flex flex-col justify-between h-[80vh] p-5'>
@@ -88,19 +107,19 @@ const ChatUser = () => {
                     {receipentUser?.name}
                 </div>
         </div>
-        <div className='h-[55vh] overflow-y-scroll p-5'>
+        <div className='h-[55vh] overflow-y-scroll p-5' id="messages">
            <div className='flex flex-col gap-2'>
                 {messages.map((mess) => {
                     const isCurrentUser = mess.sender === user._id
                     return (
-                        <div className={`flex ${isCurrentUser && "justify-end"}`}>
+                        <div key={mess._id} className={`flex ${isCurrentUser && "justify-end"}`}>
                             <div className='flex flex-col'>
                                 <h1 className={`${isCurrentUser ? "bg-primary text-white" : "bg-gray-200 text-primary"} p-2 rounded-xl rounded-bl-0`}>{mess.text}</h1>
                                 <h1 className="text-gray-500 text-sm">
                                     {moment(mess.createdAt).format("hh:mm A")}
                                 </h1>
                             </div>
-                            {isCurrentUser && <i className={`ri-check-double-line ${messages.read ? "text-green-700" : "text-gray-500"}` }></i>}
+                            {isCurrentUser && <i className={`ri-check-double-line ${mess.read ? "text-green-700" : "text-gray-500"}` }></i>}
                         </div>
                     )
                 })}

@@ -2,12 +2,14 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = require("express").Router();
 const Chat = require('../models/chatModel');
+const Message = require('../models/messageModel');
 
 
 router.post('/create-new-chat', authMiddleware, async (req,res) => {
     try {
         const newChat = new Chat(req.body)
         const saveChat = await newChat.save()
+        await savedChat.populate("members");
         res.send({
             success:true,
             message:'chat created successfully',
@@ -53,6 +55,7 @@ router.post('/clear-unread-messages', authMiddleware, async(req,res) => {
                 message: "Chat not found",
             });
         }
+
         const updatedChat = await Chat.findByIdAndUpdate(
       req.body.chat,
       {
@@ -62,6 +65,8 @@ router.post('/clear-unread-messages', authMiddleware, async(req,res) => {
     )
       .populate("members")
       .populate("lastMessage");
+
+      console.log('update',updatedChat)
 
     // find all unread messages of this chat and update them to read
     await Message.updateMany(
