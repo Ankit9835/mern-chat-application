@@ -4,8 +4,10 @@ import { SetAllChats, SetSelectedChats } from "../../../redux/userSlice"
 import toast from "react-hot-toast"
 import { hideLoader, showLoader } from "../../../redux/loaderSlice"
 import moment from "moment"
+import { useEffect } from "react"
+import store from "../../../redux/store"
 
-const UsersList = ({searchKey}) => {
+const UsersList = ({searchKey, socket}) => {
     const dispatch = useDispatch()
   const {allUser, allChats, user, selectedChats} = useSelector(state => state.userReducer)
   const insertChats = async(receipentUserId) => {
@@ -92,6 +94,27 @@ const UsersList = ({searchKey}) => {
       );
     }
   }
+
+  useEffect(() => {
+    socket.on('receive-messages', (message) => {
+      console.log('ooooooooooppppppppppp',message)
+      const tempSelectedChat = store.getState().userReducer.selectedChats
+      const allChats = store.getState().userReducer.allChats
+      if(tempSelectedChat._id !== message.chat){
+        const updatedChats = allChats.map((chat) => {
+          if(chat._id === message.chat){
+            return {
+              ...chat,
+              unreadMessages: (chat?.unreadMessages || 0) + 1,
+              lastMessage: message
+            }
+          }
+          return chat
+        })
+        dispatch(SetAllChats(updatedChats))
+      }
+    })
+  },[])
   
   return (
     <div>

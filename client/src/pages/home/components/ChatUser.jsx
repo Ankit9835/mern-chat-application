@@ -4,6 +4,7 @@ import { getMessages, sendMessage } from '../../../apicalls/messages'
 import { hideLoader, showLoader } from '../../../redux/loaderSlice'
 import moment from "moment"
 import { ClearChatMessages } from '../../../apicalls/chats'
+import store from "../../../redux/store";
 
 const ChatUser = ({socket}) => {
     const [newMessage,setNewMessage] = useState('')
@@ -77,8 +78,11 @@ const ChatUser = ({socket}) => {
             clearUnreadMsg() 
         }
 
-        socket.on('receive-messages', (message) => {
-            setMessages((prev) => [...prev, message])
+        socket.off('receive-messages').on('receive-messages', (message) => {
+            const tempSelectedChat = store.getState().userReducer.selectedChats
+            if(tempSelectedChat._id === message.chat){
+                setMessages((prev) => [...prev, message])
+            }
         })
     },[selectedChats])
 
